@@ -1,19 +1,19 @@
-const each = require("async-each");
-const queryString = require("querystring");
-const createNodeHelpers = require("gatsby-node-helpers").default;
-const eventbrite = require("eventbrite").default;
+const each = require('async-each');
+const queryString = require('querystring');
+const createNodeHelpers = require('gatsby-node-helpers').default;
+const eventbrite = require('eventbrite').default;
 
 const { createNodeFactory } = createNodeHelpers({
   typePrefix: `Eventbrite`
 });
 
-const EventNode = createNodeFactory("Event", node => {
+const EventNode = createNodeFactory('Event', node => {
   // HACK: since types are inferred we need to mock them or queries fail
   node.venue = node.venue || {
-    id: "",
-    name: "",
+    id: '',
+    name: '',
     address: {
-      localized_address_display: ""
+      localized_address_display: ''
     }
   };
   return node;
@@ -24,12 +24,12 @@ exports.sourceNodes = async function(
   { query, token, organizationId }
 ) {
   if (!token) {
-    throw new Error("Missing Eventbrite OAuth token");
+    throw new Error('Missing Eventbrite OAuth token');
   }
 
   if (!organizationId) {
     throw new Error(
-      "Missing Eventbrite Organization Id. Please refer to the v2 migration guide in ./README.md"
+      'Missing Eventbrite Organization Id. Please refer to the v2 migration guide in ./README.md'
     );
   }
   const sdk = eventbrite({ token });
@@ -39,15 +39,25 @@ exports.sourceNodes = async function(
     );
 
     const fullEvents = await new Promise((resolve, reject) => {
-      each(events, async (item, next) => {
-        const { description } = await sdk.request(
-          `/events/${item.id}/description/`
-        );
-        next(null, { ...item, description });
-      }, (err, res) => {
-        if (err) reject(err);
-        resolve(res);
-      });
+      each(
+        events,
+        async (item, next) => {
+          const { modules } = await sdk.request(
+            `/events/${item.id}/structured_content/?purpose=listing`
+          );
+
+          const description = modules
+            .filter(module => module.type === 'text')
+            .map(module => module.data.body.text)
+            .join('');
+
+          next(null, { ...item, description });
+        },
+        (err, res) => {
+          if (err) reject(err);
+          resolve(res);
+        }
+      );
     });
 
     fullEvents
@@ -56,6 +66,6 @@ exports.sourceNodes = async function(
 
     setPluginStatus({ lastFetched: new Date() });
   } catch (err) {
-    console.error("EB Fetch fail:", err);
+    console.error('EB Fetch fail:', err);
   }
 };
