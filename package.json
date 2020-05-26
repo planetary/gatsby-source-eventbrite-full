@@ -1,0 +1,29 @@
+{
+  "name": "gatsby-source-eventbrite-full",
+  "version": "1.0.0",
+  "description": "Gatsby plugin to load Eventbrite Events with full HTML description",
+  "main": "gatsby-node.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\""
+  },
+  "keywords": [
+    "gatsby",
+    "gatsby-plugin",
+    "eventbrite"
+  ],
+  "author": "Planetary",
+  "license": "MIT",
+  "dependencies": {
+    "eventbrite": "^1.2.1",
+    "gatsby-node-helpers": "^0.3.0"
+  },
+  "peerDependencies": {
+    "gatsby": "^2.0.0"
+  },
+  "repository": {
+    "url": "https://github.com/kwelch/gatsby-plugin-source-eventbrite"
+  },
+  "bugs": {
+    "url": "https://github.com/kwelch/gatsby-plugin-source-eventbrite/issues"
+  }
+}
